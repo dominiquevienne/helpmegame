@@ -13,6 +13,18 @@ return new class extends Migration
     {
         Schema::create('games', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('bgg_thing_id')->unique();
+            $table->string('thumbnail');
+            $table->string('image');
+            $table->string('name')->unique();
+            $table->text('description');
+            $table->unsignedSmallInteger('year_published')->index();
+            $table->unsignedTinyInteger('min_players')->index();
+            $table->unsignedTinyInteger('max_players')->index();
+            $table->unsignedTinyInteger('playing_time')->index();
+            $table->unsignedTinyInteger('min_playing_time')->index();
+            $table->unsignedTinyInteger('max_playing_time')->index();
+            $table->unsignedTinyInteger('min_age')->index();
             $table->timestamps();
         });
     }
