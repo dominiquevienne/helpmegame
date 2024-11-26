@@ -22,6 +22,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property int $max_playing_time
  * @property int $min_age
  * @property array<Taxonomy> $taxonomies
+ * @property array<User> $users
  */
 class Game extends Model
 {
@@ -51,7 +52,14 @@ class Game extends Model
     /**
      * Taxonomies relationship
      */
-    function taxonomies(): BelongsToMany {
+    public function taxonomies(): BelongsToMany {
         return $this->belongsToMany(Taxonomy::class);
+    }
+
+    /**
+     * Users relationship
+     */
+    public function users(): BelongsToMany {
+        return $this->belongsToMany(User::class);
     }
 }

@@ -20,6 +20,7 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::get('/profile/update', [BggProfileController::class, 'store']);
+Route::get('/collection/update', [ProfileController::class, 'updateCollection']);
 Route::get('/game/update', [GameController::class, 'store']);
 
 
