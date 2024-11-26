@@ -7,6 +7,7 @@ use App\Models\Taxonomy;
 use App\Models\TaxonomyType;
 use App\Models\User;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class GameService
 {
@@ -16,7 +17,7 @@ class GameService
      * @param $bggId
      * @return Game
      */
-    static public function getGame($bggId): Game {
+    static public function getGame($bggId): ?Game {
         $url = config('app.bgg_root_url').'thing';
         $response = Http::get($url, [
             'id' => $bggId,
@@ -25,7 +26,11 @@ class GameService
 
         $taxonomyIds = [];
         if (!$xmlContent->item->link) {
-            dd($xmlContent);
+            /**
+             * @todo Improve logic. No link means no taxonomy for the game
+             */
+            Log::warning('BGG: Thing ID ' . $bggId . ' does not exist');
+            return null;
         }
         foreach ($xmlContent->item->link as $link) {
             $taxonomyTypeName = (string) $link->attributes()['type'];
