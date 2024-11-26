@@ -5,6 +5,7 @@ namespace App\Models;
 use Database\Factories\GameFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
  * @property-read int $id
@@ -20,6 +21,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $min_playing_time
  * @property int $max_playing_time
  * @property int $min_age
+ * @property array<Taxonomy> $taxonomies
  */
 class Game extends Model
 {
@@ -45,4 +47,11 @@ class Game extends Model
         'max_playing_time',
         'min_age',
     ];
+
+    /**
+     * Taxonomies relationship
+     */
+    function taxonomies(): BelongsToMany {
+        return $this->belongsToMany(Taxonomy::class);
+    }
 }

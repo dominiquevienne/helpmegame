@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Game;
+use App\Models\Taxonomy;
+use App\Models\TaxonomyType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
@@ -29,6 +31,26 @@ class GameController extends Controller
         ]);
         $xmlContent = simplexml_load_string($response->body());
 
+        $taxonomyIds = [];
+        foreach ($xmlContent->item->link as $link) {
+            $taxonomyTypeName = (string) $link->attributes()['type'];
+            $taxonomyType = TaxonomyType::where('name', $taxonomyTypeName)->first();
+            if (!$taxonomyType) {
+                continue;
+            }
+            $taxonomyName = (string) $link->attributes()['value'];
+            $slug = (string) $link->attributes()['type'];
+            $taxonomyType = TaxonomyType::where('slug', $slug)->first();
+            $taxonomy = Taxonomy::where('name', $taxonomyName)->where('taxonomy_type_id', $taxonomyType->id)->first();
+            if (!$taxonomy) {
+                $taxonomy = new Taxonomy();
+                $taxonomy->bgg_id = (int) $link->attributes()['id'];
+                $taxonomy->name = $taxonomyName;
+                $taxonomy->taxonomy_type_id = $taxonomyType->id;
+                $taxonomy->save();
+            }
+            $taxonomyIds[] = $taxonomy->id;
+        }
         Game::where('bgg_thing_id', $id)->delete();
         $bggGame = new Game();
         $bggGame->bgg_thing_id = $id;
@@ -56,28 +78,14 @@ class GameController extends Controller
          * @todo Implement language dependence
          */
         /**
-         * @todo Implement game mechanics
-         */
-        /**
-         * @todo Implement game family
-         */
-        /**
          * @todo Implement game expansions
          */
         /**
          * @todo Implement game accessory
          */
-        /**
-         * @todo Implement game designers
-         */
-        /**
-         * @todo Implement game artists
-         */
-        /**
-         * @todo Implement game publishers
-         */
         $bggGame->delete();
         $bggGame->save();
+        $bggGame->taxonomies()->attach($taxonomyIds);
 
         dump($bggGame);
 
