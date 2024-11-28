@@ -23,7 +23,7 @@ Route::get('/profile/update', [BggProfileController::class, 'store']);
 Route::get('/collection/update', [ProfileController::class, 'updateCollection']);
 Route::get('/game/update', [GameController::class, 'store']);
 
-Route::get('/test', [\App\Http\Controllers\TestController::class, 'index']);
+//Route::get('/test', [\App\Http\Controllers\TestController::class, 'index']);
 
 
 require __DIR__.'/auth.php';
