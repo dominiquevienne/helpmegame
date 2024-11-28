@@ -22,7 +22,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         RateLimiter::for('bgg-call', function (object $job) {
-            return Limit::perMinute(500);
+            return Limit::perMinute(300);
         });
     }
 }
