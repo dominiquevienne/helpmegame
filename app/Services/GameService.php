@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Jobs\ProcessGameFetch;
 use App\Models\Game;
 use App\Models\Taxonomy;
 use App\Models\TaxonomyType;
@@ -11,16 +12,19 @@ use Illuminate\Support\Facades\Log;
 
 class GameService
 {
+    public const GETTER_PAUSE = 5;
+
     /**
      * Will delete the game in DB if exists and check for reference from source
      *
      * @param $bggId
-     * @return Game
+     * @return Game|null
      */
     static public function getGame($bggId): ?Game {
         $url = config('app.bgg_root_url').'thing';
         $response = Http::get($url, [
             'id' => $bggId,
+            'stats' => 1,
         ]);
         $xmlContent = simplexml_load_string($response->body());
 
@@ -29,6 +33,12 @@ class GameService
             /**
              * @todo Improve logic. No link means no taxonomy for the game
              */
+            if ($xmlContent->message) {
+                Log::warning('BGG: Rate limit exceeded. Pausing getter for '.self::GETTER_PAUSE.'. Thing ID: '.$bggId);
+                sleep(self::GETTER_PAUSE);
+                dispatch(new ProcessGameFetch($bggId));
+                return null;
+            }
             Log::warning('BGG: Thing ID ' . $bggId . ' does not exist');
             return null;
         }
