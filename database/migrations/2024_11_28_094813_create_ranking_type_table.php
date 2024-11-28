@@ -11,16 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('ranking_types', function (Blueprint $table) {
+        Schema::create('ranking_type', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('bgg_id')->index();
             $table->string('slug')->unique();
             $table->string('name')->unique();
-            $table->unsignedBigInteger('parent_id');
+            $table->unsignedBigInteger('parent_id')->nullable();
             $table->timestamps();
         });
-        Schema::table('ranking_types', function (Blueprint $table) {
-            $table->foreign('parent_id')->references('id')->on('ranking_types');
+        Schema::table('ranking_type', function (Blueprint $table) {
+            $table->foreign('parent_id')->references('id')->on('ranking_type');
         });
     }
 
@@ -29,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('ranking_types');
+        Schema::dropIfExists('ranking_type');
     }
 };

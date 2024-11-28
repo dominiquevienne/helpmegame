@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('games', function (Blueprint $table) {
-            $table->float('rating', 23)->unsigned()->nullable()->index()->after('min_age');
+            $table->float('rating', 23)->unsigned()->nullable()->after('min_age')->index();
         });
     }
 
@@ -22,6 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('games', function (Blueprint $table) {
+            $table->dropIndex('games_rating_index');
             $table->dropColumn('rating');
         });
     }

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Jobs\ProcessGameFetch;
 use App\Models\Game;
+use App\Models\RankingType;
 use App\Models\Taxonomy;
 use App\Models\TaxonomyType;
 use App\Models\User;
@@ -42,6 +43,7 @@ class GameService
             Log::warning('BGG: Thing ID ' . $bggId . ' does not exist');
             return null;
         }
+
         foreach ($xmlContent->item->link as $link) {
             $taxonomyTypeName = (string) $link->attributes()['type'];
             $taxonomyType = TaxonomyType::where('name', $taxonomyTypeName)->first();
@@ -62,6 +64,36 @@ class GameService
             $taxonomyIds[] = $taxonomy->id;
         }
         Game::where('bgg_thing_id', $bggId)->delete();
+
+        $rating = (float) $xmlContent->item->statistics->ratings->average->attributes() ?? null;
+        $rankingTypeIds = [];
+        foreach ($xmlContent->item->statistics->ratings->ranks->rank as $rank) {
+            $bggRankId = (int) $rank->attributes()['id'];
+            $bggType = (string) $rank->attributes()['type'];
+            $bggName = (string) $rank->attributes()['name'];
+            $bggFriendlyName = (string) $rank->attributes()['friendlyname'];
+            $bggRanking = is_numeric((string) $rank->attributes()['value']) ? (int) $rank->attributes()['value'] : null;
+
+            $rankingType = RankingType::where('bgg_id', $bggRankId)->first();
+            if ($rankingType instanceof RankingType) {
+                $rankingTypeIds[$rankingType->id] = ['ranking' => $bggRanking];
+                continue;
+            }
+            $rankingType = new RankingType();
+            $rankingType->bgg_id = $bggRankId;
+            $rankingType->slug = $bggName;
+            $rankingType->name = $bggFriendlyName;
+            if ($bggType === 'subtype') {
+                $rankingType->parent_id = null;
+            }
+            if ($bggType === 'family') {
+                $rankingType->parent_id = count($rankingTypeIds) ? $rankingTypeIds[0] : null;
+            }
+            $rankingType->save();
+            $rankingTypeIds[$rankingType->id] = ['ranking' => $bggRanking];
+
+        }
+
         $bggGame = new Game();
         $bggGame->bgg_thing_id = $bggId;
         $bggGame->thumbnail = (string) $xmlContent->item->thumbnail;
@@ -81,6 +113,7 @@ class GameService
         $bggGame->min_playing_time = (int) $xmlContent->item->minplaytime->attributes();
         $bggGame->max_playing_time = (int) $xmlContent->item->maxplaytime->attributes();
         $bggGame->min_age = (int) $xmlContent->item->minage->attributes();
+        $bggGame->rating = $rating;
         /**
          * @todo Implement suggested minimum age
          */
@@ -93,9 +126,9 @@ class GameService
         /**
          * @todo Implement game accessory
          */
-        $bggGame->delete();
         $bggGame->save();
         $bggGame->taxonomies()->attach($taxonomyIds);
+        $bggGame->rankingTypes()->attach($rankingTypeIds);
 
         return $bggGame;
     }

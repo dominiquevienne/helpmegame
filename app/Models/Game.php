@@ -21,6 +21,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property int $min_playing_time
  * @property int $max_playing_time
  * @property int $min_age
+ * @property float $rating
  * @property array<Taxonomy> $taxonomies
  * @property array<User> $users
  * @property array<RankingType> $rankingTypes
@@ -48,6 +49,7 @@ class Game extends Model
         'min_playing_time',
         'max_playing_time',
         'min_age',
+        'rating',
     ];
 
     /**

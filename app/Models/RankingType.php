@@ -20,6 +20,9 @@ class RankingType extends Model
     /** @use HasFactory<RankingTypeFactory> */
     use HasFactory;
 
+    protected $table = 'ranking_type';
+
+
     /**
      * The attributes that are mass assignable.
      *
