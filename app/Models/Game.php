@@ -23,6 +23,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property int $min_age
  * @property array<Taxonomy> $taxonomies
  * @property array<User> $users
+ * @property array<RankingType> $rankingTypes
  */
 class Game extends Model
 {
@@ -61,5 +62,13 @@ class Game extends Model
      */
     public function users(): BelongsToMany {
         return $this->belongsToMany(User::class);
+    }
+
+    /**
+     * Ranking relationship
+     */
+    public function rankingTypes(): BelongsToMany {
+        return $this->belongsToMany(RankingType::class)
+            ->withPivot(['ranking', ]);
     }
 }
